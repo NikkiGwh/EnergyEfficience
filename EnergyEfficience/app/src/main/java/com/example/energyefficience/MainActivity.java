@@ -4,20 +4,18 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager2.widget.ViewPager2;
-
 import android.os.Bundle;
-import android.util.Log;
-
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+
+
 
 public class MainActivity extends AppCompatActivity {
     MyFragmentStateAdapter adapter;
     ViewPager2 viewpager;
     Toolbar toolbar;
     TabLayout tabLayout;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
                         tab.setText("Base64");
                         break;
                     case 1:
-                        tab.setText("Sorting");
+                        tab.setText("please");
                         break;
                     default: break;
                 }
