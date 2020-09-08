@@ -1,5 +1,6 @@
 package com.example.energyefficience;
 
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,6 +8,10 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+
+import java.nio.file.Path;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,11 +60,20 @@ public class SecondAlgFramgment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-
+    ImageView PathCanvasImageView;
+    Button PathComputingBtn;
+    View rootview;
+    CustomDrawable picasso;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_second_alg_framgment, container, false);
+        rootview = inflater.inflate(R.layout.fragment_second_alg_framgment, container, false);
+        PathCanvasImageView = (ImageView) rootview.findViewById(R.id.PathFindingCanvas);
+        PathComputingBtn = (Button) rootview.findViewById(R.id.PathComputeBtn);
+
+        picasso = new CustomDrawable(6);
+        PathCanvasImageView.setImageDrawable(picasso);
+        return rootview;
     }
 }
