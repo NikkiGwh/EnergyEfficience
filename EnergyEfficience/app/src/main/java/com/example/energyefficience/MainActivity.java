@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
                         tab.setText("Base64");
                         break;
                     case 1:
-                        tab.setText("please");
+                        tab.setText("A* - Path Finding");
                         break;
                     default: break;
                 }

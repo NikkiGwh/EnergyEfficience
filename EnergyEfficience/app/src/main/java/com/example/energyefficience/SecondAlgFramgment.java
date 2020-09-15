@@ -8,8 +8,12 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.nio.file.Path;
 
@@ -62,6 +66,8 @@ public class SecondAlgFramgment extends Fragment {
     }
     ImageView PathCanvasImageView;
     Button PathComputingBtn;
+    Button GenerateMapBtn;
+    EditText ObstaclesEditText;
     View rootview;
     CustomDrawable picasso;
     @Override
@@ -70,10 +76,29 @@ public class SecondAlgFramgment extends Fragment {
         // Inflate the layout for this fragment
         rootview = inflater.inflate(R.layout.fragment_second_alg_framgment, container, false);
         PathCanvasImageView = (ImageView) rootview.findViewById(R.id.PathFindingCanvas);
-        PathComputingBtn = (Button) rootview.findViewById(R.id.GenerateKnotsBtn);
-
-        picasso = new CustomDrawable(100);
+        PathComputingBtn = (Button) rootview.findViewById(R.id.FindPathbtn);
+        GenerateMapBtn = (Button) rootview.findViewById(R.id.GenerateMapbtn);
+        ObstaclesEditText = (EditText) rootview.findViewById(R.id.editTextNumOfObs);
+        picasso = new CustomDrawable();
         PathCanvasImageView.setImageDrawable(picasso);
+
+        GenerateMapBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                picasso.numOfObstacles = Integer.parseInt(ObstaclesEditText.getText().toString());
+                picasso.generateMap();
+                PathComputingBtn.setEnabled(true);
+                PathCanvasImageView.postInvalidate();
+            }
+        });
+        PathComputingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                picasso.computePath(1);
+                PathComputingBtn.setEnabled(false);
+                PathCanvasImageView.postInvalidate();
+            }
+        });
         return rootview;
     }
 }

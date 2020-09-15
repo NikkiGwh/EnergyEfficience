@@ -14,22 +14,52 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/PathFindingCanvas"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="500dp"
             android:layout_margin="5dp"
             android:background="@color/canvasBackground"
-            app:layout_constraintBottom_toTopOf="@+id/GenerateKnotsBtn"
+            app:layout_constraintBottom_toTopOf="@+id/FindPathbtn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/GenerateKnotsBtn"
+            android:id="@+id/GenerateMapbtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="24dp"
-            android:text="generate knots"
+            android:text="generate map"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="@+id/PathFindingCanvas" />
+
+        <Button
+            android:id="@+id/FindPathbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="find path"
+            app:layout_constraintBottom_toTopOf="@+id/GenerateMapbtn"
+            app:layout_constraintEnd_toEndOf="@+id/PathFindingCanvas" />
+
+        <TextView
+            android:id="@+id/textViewObstacles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/cardview_light_background"
+            android:text="number of obstacles"
+            app:layout_constraintBottom_toTopOf="@+id/editTextNumOfObs"
+            app:layout_constraintStart_toStartOf="@+id/PathFindingCanvas" />
+
+        <EditText
+            android:id="@+id/editTextNumOfObs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/cardview_light_background"
+            android:ems="5"
+            android:hint="integer"
+            android:inputType="number"
+            android:text="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/textViewObstacles" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>
