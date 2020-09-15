@@ -18,16 +18,16 @@
             android:layout_height="500dp"
             android:layout_margin="5dp"
             android:background="@color/canvasBackground"
-            app:layout_constraintBottom_toTopOf="@+id/PathComputeBtn"
+            app:layout_constraintBottom_toTopOf="@+id/GenerateKnotsBtn"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/PathComputeBtn"
+            android:id="@+id/GenerateKnotsBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="24dp"
-            android:text="compute"
+            android:text="generate knots"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -70,9 +70,9 @@ public class SecondAlgFramgment extends Fragment {
         // Inflate the layout for this fragment
         rootview = inflater.inflate(R.layout.fragment_second_alg_framgment, container, false);
         PathCanvasImageView = (ImageView) rootview.findViewById(R.id.PathFindingCanvas);
-        PathComputingBtn = (Button) rootview.findViewById(R.id.PathComputeBtn);
+        PathComputingBtn = (Button) rootview.findViewById(R.id.GenerateKnotsBtn);
 
-        picasso = new CustomDrawable(6);
+        picasso = new CustomDrawable(100);
         PathCanvasImageView.setImageDrawable(picasso);
         return rootview;
     }

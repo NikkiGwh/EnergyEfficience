@@ -6,73 +6,94 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CustomDrawable extends Drawable {
-    public Path getPathKnots() {
-        return pathKnots;
-    }
 
-    public void setPathKnots(Path pathKnots) {
-        this.pathKnots = pathKnots;
-    }
+    public int squareSize = 20;
+    public int gapSize = 3;
+    private Knot[][] MatrixMap = null;
 
-    public Path getPathEdge() {
-        return pathEdge;
-    }
+    private Path pathMap = new Path();
+    private Path pathObstacles = new Path();
+    private Path pathTour = new Path();
 
-    public void setPathEdge(Path pathEdge) {
-        this.pathEdge = pathEdge;
-    }
-    private Path pathKnots = new Path();
-    private Path pathEdge = new Path();
-    private Paint brushEdge = new Paint();
-    private Paint brushKnots = new Paint();
-    private int num = 0;
+    private Paint brushFill = new Paint();
+    private Paint brushStroke = new Paint();
+    private int numOfObstacles = 0;
+
     public CustomDrawable(int num) {
-       this.num = num;
-        brushEdge.setAntiAlias(true);
-        brushEdge.setColor(Color.MAGENTA);
-        brushEdge.setStyle(Paint.Style.STROKE);
-        brushEdge.setStrokeWidth(8f);
-        brushKnots.setAntiAlias(true);
-        brushKnots.setColor(Color.RED);
-        brushKnots.setStyle(Paint.Style.STROKE);
-        brushKnots.setStrokeWidth(8f);
+       this.numOfObstacles = num;
+        brushFill.setAntiAlias(true);
+        brushFill.setStyle(Paint.Style.FILL);
+
+
+        brushStroke.setAntiAlias(true);
+        brushStroke.setStyle(Paint.Style.STROKE);
+        brushStroke.setStrokeWidth(2);
+    }
+    //initializes pathTour and modifies MatrixMap and DestKnot and StartKnot
+    public void computePath(int ChoiceOfImplementation){
+        //generate random Start and Destination
+        Knot startKnot = new Knot(getRandomNumber(0,MatrixMap.length-1), getRandomNumber(0, MatrixMap[0].length-1));
+        Knot destKnot = null;
+        for(int i = 0; i != 1;){
+            destKnot = new Knot(getRandomNumber(0,MatrixMap.length-1), getRandomNumber(0, MatrixMap[0].length-1));
+            if(!destKnot.equals(startKnot))
+                i=1;
+        }
+        switch (ChoiceOfImplementation)
+        {
+            case 1:
+                //todo mal nachschauen ob MatrixMap danach auch verändert ist (call by reference)
+                List<Knot> tour = DjikstraImplementation.computeSynchronouse(this.MatrixMap, startKnot, destKnot);
+                for (Knot current :
+                        tour) {
+                    this.pathTour.addRect(
+                            current.getX()* (squareSize+gapSize)+ gapSize, current.getY()*(squareSize+gapSize)+ gapSize, current.getX()*(squareSize+gapSize)+gapSize+squareSize,
+                            current.getY()*(squareSize+gapSize)+gapSize+squareSize, Path.Direction.CCW );
+                }
+                return;
+            default:
+                return;
+        }
     }
 
-    private Path generateRandomKnots(int num, Rect bounds) {
-        Path p = new Path();
-        int flag;
-        //x muss zwischen Rect.x und Rect.x + width liegen und y analog
-
-        List<Point> li = new ArrayList<Point>();
-        for (int i = 0; i < num;) {
-            flag = 0;
-            Point knot = new Point();
-            knot.x = getRandomNumber(bounds.left, bounds.right);
-            knot.y = getRandomNumber(bounds.top, bounds.bottom);
-            for (Point current : li) {
-                if(current.equals(knot))
-                    flag = 1;
-            }
-            if(flag != 1)
-            {
-                i++;
-                li.add(knot);
-                p.addCircle(knot.x, knot.y, 5, Path.Direction.CCW);
+    //initializes MatrixMap, pathMap, pathObstacles
+    private void generateMap(Rect bounds) {
+        int mapWidth = bounds.width() / (squareSize+gapSize);
+        int mapHeight = bounds.height() / (squareSize+gapSize);
+        MatrixMap = new Knot[mapWidth][mapHeight];
+        int s = 0;
+        for(int x = 0; x < mapWidth; x++){
+            for(int y = 0; y < mapHeight; y++){
+                MatrixMap[x][y]= new Knot(x,y);
+                    pathMap.addRect(
+                            x*(squareSize+gapSize)+ gapSize,y*(squareSize+gapSize)+gapSize, x*(squareSize+gapSize)+gapSize+squareSize,
+                            y*(squareSize+gapSize)+gapSize+squareSize, Path.Direction.CCW);
             }
         }
-        return p;
+        //generate Obstacles
+        List<Knot> obs = new ArrayList<Knot>();
+        Knot current = null;
+        for(int i = 0; i < this.numOfObstacles;){
+            current = new Knot(getRandomNumber(0, mapWidth-1), getRandomNumber(0, mapHeight-1));
+            if(!obs.contains(current)){
+                MatrixMap[current.getX()][current.getY()].setObstacle(true);
+                pathObstacles.addRect(
+                        current.getX()*(squareSize+gapSize)+ gapSize, current.getY()*(squareSize+gapSize)+ gapSize,
+                        current.getX()*(squareSize+gapSize)+gapSize+squareSize,
+                        current.getY()*(squareSize+gapSize)+gapSize+squareSize, Path.Direction.CCW);
+                i++;
+            }
+        }
     }
 
     private int getRandomNumber(int min, int max) {
@@ -81,10 +102,26 @@ public class CustomDrawable extends Drawable {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        if(pathKnots.isEmpty())
-            this.pathKnots = generateRandomKnots(num, getBounds());
-        canvas.drawPath(pathEdge, brushEdge);
-        canvas.drawPath(pathKnots, brushKnots);
+        //creates matrix and initializes pathMap and pathObstacles
+        generateMap(getBounds());
+        computePath(1);
+
+        if(!pathMap.isEmpty())
+        {
+            brushStroke.setColor(Color.rgb(87,48,14));
+            canvas.drawPath(pathMap, brushStroke);
+        }
+        if(!pathTour.isEmpty())
+        {
+            brushFill.setColor(Color.rgb(84,194,45));
+            canvas.drawPath(pathTour, brushFill);
+        }
+        if(!pathObstacles.isEmpty())
+        {
+            brushFill.setColor(Color.rgb(0,0,0));
+            canvas.drawPath(pathObstacles, brushFill);
+        }
+
     }
 
     @Override
