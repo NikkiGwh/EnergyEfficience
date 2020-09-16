@@ -1,11 +1,18 @@
 package com.example.energyefficience;
 
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -73,6 +80,7 @@ public class SecondAlgFramgment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         // Inflate the layout for this fragment
         rootview = inflater.inflate(R.layout.fragment_second_alg_framgment, container, false);
         PathCanvasImageView = (ImageView) rootview.findViewById(R.id.PathFindingCanvas);
@@ -99,6 +107,26 @@ public class SecondAlgFramgment extends Fragment {
                 PathCanvasImageView.postInvalidate();
             }
         });
+        Toolbar toolbar = rootview.findViewById(R.id.pathFindingToolbar);
+        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         return rootview;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.path_finding_toolbar_menue, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        switch (item.getItemId()){
+            case R.id.action_pathFinding_startPathFindingActivity_item:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+
     }
 }
