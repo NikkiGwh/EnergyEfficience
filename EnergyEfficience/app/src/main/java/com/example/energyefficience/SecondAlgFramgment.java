@@ -119,9 +119,10 @@ public class SecondAlgFramgment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
+        Intent intent = new Intent(getContext(), PathFindingActivity.class);
         switch (item.getItemId()){
             case R.id.action_pathFinding_startPathFindingActivity_item:
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

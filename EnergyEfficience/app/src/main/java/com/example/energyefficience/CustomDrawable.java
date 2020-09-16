@@ -85,7 +85,7 @@ public class CustomDrawable extends Drawable {
         pathObstacles = new Path();
         List<Knot> obs = new ArrayList<Knot>();
         Knot current = new Knot(getRandomNumber(0, mapWidth-1), getRandomNumber(0, mapHeight-1));
-        for(int i = 1; i < this.numOfObstacles;){
+        for(int i = 0; i < this.numOfObstacles;){
             if(!obs.contains(current)){
                 obs.add(current);
                 MatrixMap[current.getX()][current.getY()].setObstacle(true);
