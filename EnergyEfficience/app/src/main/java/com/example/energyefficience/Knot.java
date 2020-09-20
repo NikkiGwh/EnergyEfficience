@@ -67,6 +67,14 @@ public class Knot {
         this.gValue = 0; //actual pathlength from start knot, when never accessed it's -1
         this.fValue = 0;
     }
+    Knot(int x, int y, boolean isObstacle) {
+        this.x = x;
+        this.y = y;
+        this.parent = null;
+        this.gValue = 0; //actual pathlength from start knot, when never accessed it's -1
+        this.fValue = 0;
+        this.isObstacle = isObstacle;
+    }
 
     Knot() {
         this.x = 0;

@@ -9,44 +9,43 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
-public class Base64RecyclerViewAdapter extends  RecyclerView.Adapter<Base64RecyclerViewAdapter.MyBase64ViewHolder>{
+public class Base64RecyclerViewAdapter extends  RecyclerView.Adapter<Base64RecyclerViewAdapter.SimpleTextViewViewHolder>{
 
     private final LayoutInflater mInflater;
-    private List<Base64BlindTextEntity> elementsList;
+    private List<String> elementsList;
 
-    class MyBase64ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView base64TextView;
-        private final TextView base64EncodedTextView;
-        private MyBase64ViewHolder(View recyclerItemView) {
+
+
+    class SimpleTextViewViewHolder extends RecyclerView.ViewHolder {
+        private TextView stringItemTextView = null;
+
+        private SimpleTextViewViewHolder(View recyclerItemView) {
             super(recyclerItemView);
-            base64TextView = recyclerItemView.findViewById(R.id.base64TextView);
-            base64EncodedTextView = recyclerItemView.findViewById(R.id.base64EncodedTextView);
+            stringItemTextView = recyclerItemView.findViewById(R.id.ResultItemTextView);
         }
     }
 
 
     public Base64RecyclerViewAdapter(Context context) {
-
-
         mInflater = LayoutInflater.from(context);
     }
     @Override
-    public MyBase64ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public SimpleTextViewViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View recyclerItemView = mInflater.inflate(R.layout.recyclerview_item, parent, false);
-        return new MyBase64ViewHolder(recyclerItemView);
+        return new SimpleTextViewViewHolder(recyclerItemView);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyBase64ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull SimpleTextViewViewHolder holder, int position) {
         if(elementsList != null){
-            Base64BlindTextEntity current = elementsList.get(position);
-            holder.base64TextView.setText(current.getBlindText());
-            holder.base64EncodedTextView.setText(current.getEncodedText());
+            String current = elementsList.get(position);
+            holder.stringItemTextView.setText(current);
         }else{
             //data not ready yet
-            holder.base64TextView.setText("empty List");
         }
     }
     @Override
@@ -56,7 +55,7 @@ public class Base64RecyclerViewAdapter extends  RecyclerView.Adapter<Base64Recyc
         }else
             return 0;
     }
-    void setElementsList(List<Base64BlindTextEntity> elementsList){
+    void setElementsList(List<String> elementsList){
         this.elementsList = elementsList;
         notifyDataSetChanged();
     }

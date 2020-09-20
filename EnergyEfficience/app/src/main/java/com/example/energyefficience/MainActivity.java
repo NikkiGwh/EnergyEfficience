@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager2.widget.ViewPager2;
 import android.os.Bundle;
+import android.view.View;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.addTab(tabLayout.newTab());
+        tabLayout.addTab(tabLayout.newTab());
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         viewpager = findViewById(R.id.pager);
         adapter = new MyFragmentStateAdapter(this, tabLayout.getTabCount());
@@ -39,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case 1:
                         tab.setText("A* - Path Finding");
+                        break;
+                    case 2:
+                        tab.setText("Merge Sort");
                         break;
                     default: break;
                 }

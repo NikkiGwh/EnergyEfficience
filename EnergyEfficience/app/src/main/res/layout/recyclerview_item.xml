@@ -3,25 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
-
-    <TextView
-        android:id="@+id/base64TextView"
-        style="@style/word_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-         />
+    android:layout_height="wrap_content">
 
     <TextView
         style="@style/word_title"
-        android:id="@+id/base64EncodedTextView"
+        android:id="@+id/ResultItemTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="hallo"
-        android:layout_weight="1"
         android:background="@android:color/holo_blue_bright"/>
-
-
 </LinearLayout>

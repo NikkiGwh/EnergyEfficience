@@ -40,10 +40,10 @@ public class DjikstraImplementation {
                             next = matrix[current.getX()][current.getY() + 1];
                         break;
                 }
-                int new_cost = (int)current.getfValue() + 1;
+                int new_cost = (int)current.getgValue() + 1;
                 if(next != null && next.getParent() == null &&(next.getgValue() == 0 || new_cost < next.getgValue()))
                 {
-                    next.setfValue(new_cost);
+                    next.setgValue(new_cost);
                     double fValue = new_cost + next.getRasterDistance(destination);
                     next.setfValue(fValue);
                     next.setParent(current);

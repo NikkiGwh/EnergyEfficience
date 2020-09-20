@@ -14,15 +14,18 @@ public class Base64Repository {
     Base64Repository(Application application){
         MyRoomDatabase db = MyRoomDatabase.getDatabase(application);
         base64BlindTextDao = db.base64BlindTextDao();
-        completeList =base64BlindTextDao.getAllEntries();
+        completeList = base64BlindTextDao.getAllEntries();
     }
 
-    LiveData<List<Base64BlindTextEntity>> getAllEntries(){
+    public LiveData<List<Base64BlindTextEntity>> getAllEntries()
+    {
         return this.completeList;
     }
+
     public void insert(Base64BlindTextEntity ob){
         new insertAsyncTask(base64BlindTextDao).execute(ob);
     }
+
     private static class insertAsyncTask extends AsyncTask<Base64BlindTextEntity, Void, Void> {
 
         private Base64BlindTextDao mAsyncTaskDao;

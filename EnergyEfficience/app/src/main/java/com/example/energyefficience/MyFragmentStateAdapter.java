@@ -25,12 +25,16 @@ public class MyFragmentStateAdapter extends FragmentStateAdapter{
             case 1:
                 fragment = new SecondAlgFramgment();
                 return fragment;
+            case 2:
+                fragment = new MergeSortFragment();
+                return fragment;
             default: return null;
         }
     }
 
     @Override
-    public int getItemCount() {
+    public int getItemCount()
+    {
         return NumofTabs;
     }
 }

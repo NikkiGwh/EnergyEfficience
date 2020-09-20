@@ -1,23 +1,20 @@
 package com.example.energyefficience;
 
-import android.graphics.Color;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,7 +22,7 @@ import java.util.List;
  * Use the {@link Base64Fragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class Base64Fragment extends Fragment {
+public class Base64Fragment extends Fragment implements Base64Callback {
 
     public static final String ARG_OBJECT = "Base64";
     // TODO: Rename parameter arguments, choose names that match
@@ -60,8 +57,14 @@ public class Base64Fragment extends Fragment {
     }
     private Base64ViewModel base64ViewModel;
     Base64RecyclerViewAdapter adapter;
+    List<String> statsItems = new ArrayList<String>();
     Button decode_btn;
-    List<Base64BlindTextEntity> li;
+    Button decode_hope_btn;
+    Button decodeShowcase_btn;
+    TextView showCaseResultTextView;
+    EditText plainTextShowcaseEditText;
+    EditText stringSizeEditText;
+    //List<Base64BlindTextEntity> li;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,27 +83,38 @@ public class Base64Fragment extends Fragment {
         //set recyclerView and adapter(manages the layout per item)
         RecyclerView recyclerView = rootView.findViewById(R.id.recyclerview);
         adapter = new Base64RecyclerViewAdapter(this.getContext());
+        adapter.setElementsList(statsItems);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
         //View Model
-        base64ViewModel = new ViewModelProvider(this).get(Base64ViewModel.class);
+       /* base64ViewModel = new ViewModelProvider(this).get(Base64ViewModel.class);
         base64ViewModel.getAllEntries().observe(requireActivity(), new Observer<List<Base64BlindTextEntity>>(){
             @Override
             public void onChanged(List<Base64BlindTextEntity> base64BlindTextEntities) {
                 adapter.setElementsList(base64BlindTextEntities);
-                li = base64BlindTextEntities;
+               // li = base64BlindTextEntities;
             }
         });
-        //decode button
+        */
         decode_btn = (Button) rootView.findViewById(R.id.encodebtn);
-        decode_btn.setOnClickListener(new View.OnClickListener() {
+        decodeShowcase_btn = (Button) rootView.findViewById(R.id.EncodeShowcaseBtn);
+        plainTextShowcaseEditText = (EditText) rootView.findViewById(R.id.editTextPlainTextExample);
+        showCaseResultTextView = (TextView) rootView.findViewById(R.id.textViewShowcase);
+        decodeShowcase_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String encodedshowcase = Base64Implementation.encodeSynchronously(plainTextShowcaseEditText.getText().toString());
+                showCaseResultTextView.setText(encodedshowcase);
+            }
+        });
+       /* decode_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 decode_btn.setBackgroundColor(Color.GRAY);
 
                 for (Base64BlindTextEntity x : li)
                 {
-                    x.setEncodedText(Base64Implementation.encodeOnUIThread(x.getBlindText()));
+                    x.setEncodedText(Base64Implementation.encodeSynchronously(x.getBlindText()));
                 }
                 decode_btn.setBackgroundColor(Color.RED);
                 for (Base64BlindTextEntity x : li)
@@ -109,8 +123,86 @@ public class Base64Fragment extends Fragment {
                 }
                decode_btn.setBackgroundColor(getResources().getColor(R.color.colorAccent));
             }
+        });*/
+       decode_btn.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               doEncodingAsynch();
+           }
+       });
+        stringSizeEditText = rootView.findViewById(R.id.editTextStringSize);
+        decode_hope_btn = rootView.findViewById(R.id.buttonhope);
+        decode_hope_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                doEncodeSynch();
+            }
         });
         return rootView;
 
+    }
+    private int currentSize = 0;
+    private int chunkSize=0;
+    private Base64ThreadPoolManager mBase64ThreadPoolManager;
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mBase64ThreadPoolManager = Base64ThreadPoolManager.getInstance();
+    }
+
+    @Override
+    public void onComplete(String result) {
+        synchronized (this){
+            currentSize += chunkSize;
+            String encoded = result;
+            if(currentSize >= totaldataInKB){
+                currentSize = 0;
+                endTime = System.nanoTime();
+                long duration =  (endTime-startTime) / 1000000 ;
+                Log.d("BASE64:", "runtime Asynch: " + String.valueOf(duration) + " ms");
+                statsItems.add("asynchronous Base64 decoding on " + mBase64ThreadPoolManager.getNumberOfCores() + " Threads:: " + totaldataInKB + " KB" + " in " + String.valueOf(duration) +" ms");
+                adapter.setElementsList(statsItems);
+            }
+        }
+    }
+    long startTime = 0;
+    long endTime = 0;
+    int totaldataInKB = 0;
+    int chunksizeInKB = 10000;
+
+    public void doEncodingAsynch(){
+        startTime = System.nanoTime();
+        totaldataInKB = Integer.parseInt(stringSizeEditText.getText().toString());
+        chunksizeInKB = 1000;
+        int chunkperThread = chunksizeInKB / mBase64ThreadPoolManager.getNumberOfCores();
+        chunkSize = chunkperThread;
+
+        for( int i = 0; i < totaldataInKB; i = i +chunksizeInKB){
+
+            for(int j = 0; j < chunksizeInKB; j = j + chunkperThread){
+                Base64EncodeCallable callable = new Base64EncodeCallable(chunkperThread,this, mBase64ThreadPoolManager.getMainThreadHandler());
+                mBase64ThreadPoolManager.addCallable(callable);
+            }
+        }
+        //mBase64ThreadPoolManager.cancelAllTasks();
+
+    }
+    public void doEncodeSynch(){
+        startTime = System.nanoTime();
+        totaldataInKB = Integer.parseInt(stringSizeEditText.getText().toString());
+        chunksizeInKB = 10000;
+        String hopefully;
+        int i = 0;
+        for( i = 0; i < totaldataInKB; i = i +chunksizeInKB){
+            hopefully = Base64Implementation.createBigString(chunksizeInKB);
+            String resultencoded = Base64Implementation.encodeSynchronously(hopefully);
+        }
+        endTime = System.nanoTime();
+        long duration =  (endTime-startTime) / 1000000 ;
+        Log.d("BASE64:", "runtime snych: " + String.valueOf(duration) + " ms");
+        statsItems.add("synchronouse Base64 decoding on UI-Thread of " + totaldataInKB + " KB" + " in " + String.valueOf(duration) +" ms");
+        //todo undo comment if nothing is updated on the screen .. otherwise delte following line
+        adapter.setElementsList(statsItems);
     }
 }
