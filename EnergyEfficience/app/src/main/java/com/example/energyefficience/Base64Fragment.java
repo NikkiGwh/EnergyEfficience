@@ -143,12 +143,12 @@ public class Base64Fragment extends Fragment implements Base64Callback {
     }
     private int currentSize = 0;
     private int chunkSize=0;
-    private Base64ThreadPoolManager mBase64ThreadPoolManager;
+    private CustomThreadPoolManager mBase64ThreadPoolManager;
 
     @Override
     public void onStart() {
         super.onStart();
-        mBase64ThreadPoolManager = Base64ThreadPoolManager.getInstance();
+        mBase64ThreadPoolManager = CustomThreadPoolManager.getInstance();
     }
 
     @Override
@@ -199,7 +199,7 @@ public class Base64Fragment extends Fragment implements Base64Callback {
             String resultencoded = Base64Implementation.encodeSynchronously(hopefully);
         }
         endTime = System.nanoTime();
-        long duration =  (endTime-startTime) / 1000000 ;
+        long duration =  (endTime-startTime) / 1000000;
         Log.d("BASE64:", "runtime snych: " + String.valueOf(duration) + " ms");
         statsItems.add("synchronouse Base64 decoding on UI-Thread of " + totaldataInKB + " KB" + " in " + String.valueOf(duration) +" ms");
         //todo undo comment if nothing is updated on the screen .. otherwise delte following line

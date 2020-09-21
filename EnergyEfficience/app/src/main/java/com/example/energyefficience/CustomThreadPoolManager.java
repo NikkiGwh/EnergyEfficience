@@ -2,15 +2,12 @@ package com.example.energyefficience;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.renderscript.RenderScript;
 import android.util.Log;
 
 import androidx.core.os.HandlerCompat;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -25,9 +22,12 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 interface Base64Callback{
     void onComplete(String result);
 }
-public class Base64ThreadPoolManager {
+interface MergeSortCallback{
+    void onComplete(int[] restul);
+}
+public class CustomThreadPoolManager {
 
-    private static Base64ThreadPoolManager singleInstance = null;
+    private static CustomThreadPoolManager singleInstance = null;
     private  static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
     private static final int KEEP_ALIVE_TIME = 1;
     private  static final TimeUnit KEEP_ALIVE_TIME_UNIT;
@@ -46,9 +46,9 @@ public class Base64ThreadPoolManager {
 
     static{
         KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
-        singleInstance = new Base64ThreadPoolManager();
+        singleInstance = new CustomThreadPoolManager();
     }
-    private Base64ThreadPoolManager(){
+    private CustomThreadPoolManager(){
         mTaskQueue = new LinkedBlockingQueue<Runnable>();
         mRunningTaskList = new ArrayList<>();
         mExecuterService = new ThreadPoolExecutor(
@@ -61,7 +61,7 @@ public class Base64ThreadPoolManager {
     }
 
 
-    public static Base64ThreadPoolManager getInstance(){
+    public static CustomThreadPoolManager getInstance(){
         return singleInstance;
     }
     public int getNumberOfCores(){
@@ -84,10 +84,9 @@ public class Base64ThreadPoolManager {
         @Override
         public Thread newThread(Runnable runnable) {
             Thread thread = new Thread(runnable);
-            thread.setName("Base64CustomThread" + sTag);
+            thread.setName("CustomThread" + sTag);
             sTag++;
             thread.setPriority(THREAD_PRIORITY_BACKGROUND);
-
             // A exception handler is created to log the exception from threads
             thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
                 @Override

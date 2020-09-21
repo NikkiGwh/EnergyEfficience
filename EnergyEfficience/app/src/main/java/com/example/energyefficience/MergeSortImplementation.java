@@ -7,7 +7,6 @@ public class MergeSortImplementation {
     }
 
     public int[] sort(int l, int r) {
-
         if (l < r) {
             int q = (l + r) / 2;
 
