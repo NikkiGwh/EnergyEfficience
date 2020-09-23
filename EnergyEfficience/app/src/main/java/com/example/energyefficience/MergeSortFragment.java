@@ -1,11 +1,13 @@
 package com.example.energyefficience;
 
+import android.content.ClipData;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +26,7 @@ import java.util.concurrent.ForkJoinPool;
  * Use the {@link MergeSortFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MergeSortFragment extends Fragment {
+public class MergeSortFragment extends Fragment implements  MergeSortCallback{
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -81,6 +83,9 @@ public class MergeSortFragment extends Fragment {
                 case R.id.radio_parallel_library:
                     choiceOfMerge = 2;
                     break;
+                case R.id.radio_iterative:
+                    choiceOfMerge = 3;
+                    break;
                 default:
                     choiceOfMerge = 0;
                     break;
@@ -94,8 +99,10 @@ public class MergeSortFragment extends Fragment {
     int[] ItemArray;
     Button MergeSortBtn, GenerateNumbersBtn;
     EditText CountOfFigures;
-    RadioButton rb_classic, rb_parallel, rb_parallel_library;
+    RadioButton rb_classic, rb_parallel, rb_parallel_library, rb_iterative;
     TextView computationTime;
+    CustomThreadPoolManager mCutomThreadPoolManager;
+    ForkJoinPool forkJoinPool;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -114,7 +121,11 @@ public class MergeSortFragment extends Fragment {
         rb_parallel.setOnClickListener(radioButtonOnClickListener);
         rb_parallel_library = rootView.findViewById(R.id.radio_parallel_library);
         rb_parallel_library.setOnClickListener(radioButtonOnClickListener);
-
+        rb_iterative = rootView.findViewById(R.id.radio_iterative);
+        rb_iterative.setOnClickListener(radioButtonOnClickListener);
+        mCutomThreadPoolManager.setNumberOfCores(1);
+        forkJoinPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1);
+        mCutomThreadPoolManager = CustomThreadPoolManager.getInstance();
         GenerateNumbersBtn = rootView.findViewById(R.id.generateNumbersBtn);
         CountOfFigures = (EditText)rootView.findViewById(R.id.editTextCountOfFigures);
         GenerateNumbersBtn.setOnClickListener(new View.OnClickListener() {
@@ -145,31 +156,50 @@ public class MergeSortFragment extends Fragment {
         int g = (int)(Math.random()*((max-min)+1)) + min;
         return g;
     }
-
+    long startTime = 0;
+    long stopTime = 0;
+    long stopTime2 = 0;
+    long result = 0;
+    long result2 = 0;
     private void callMergeSort()
     {
 
+
         Items.clear();
-        long startTime = System.nanoTime();
+         startTime = System.nanoTime();
         switch (choiceOfMerge){
             case 0:
-                MergeSortImplementation sorter = new MergeSortImplementation(ItemArray);
-                sorter.sort(0, ItemArray.length-1);
-                break;
+                mCutomThreadPoolManager.addCallable(new MergeSortCallable(mCutomThreadPoolManager.getMainThreadHandler(), ItemArray, this, 1));
+                return;
             case 1:
-                final ForkJoinPool forkJoinPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1);
-                forkJoinPool.invoke(new ParallelMergeSort(ItemArray, 0, ItemArray.length - 1));
+                int[] helper = new int[ItemArray.length];
+                forkJoinPool.invoke(new ParallelMergeSort(ItemArray, helper,0, ItemArray.length - 1));
+                Log.i("niklas", String.valueOf(forkJoinPool.getPoolSize()));
                 break;
             case 2:
                 Arrays.parallelSort(ItemArray);
                 break;
+            case 3:
+                mCutomThreadPoolManager.addCallable(new MergeSortCallable(mCutomThreadPoolManager.getMainThreadHandler(), ItemArray, this, 2));
+                return;
             default:
                 break;
         }
-        long stopTime = System.nanoTime();
-        long result = (stopTime - startTime)/1000000;
+         stopTime = System.nanoTime();
+         result = (stopTime - startTime)/1000000;
         computationTime.setText(String.valueOf(result) + " ms");
 
+        for(int i = 0; i < ItemArray.length; i++){
+            Items.add(String.valueOf(ItemArray[i]));
+        }
+        adapter.setElementsList(Items);
+    }
+
+    @Override
+    public void onComplete(int[] restul) {
+        stopTime2 = System.nanoTime();
+        result2 = (stopTime2 - startTime)/1000000;
+        computationTime.setText(String.valueOf(result2) + " ms");
         for(int i = 0; i < ItemArray.length; i++){
             Items.add(String.valueOf(ItemArray[i]));
         }

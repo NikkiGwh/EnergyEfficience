@@ -2,8 +2,10 @@ package com.example.energyefficience;
 
 public class MergeSortImplementation {
     public static int[] intArr;
-    public MergeSortImplementation(int[] intArr){
+    public static int[] arr;
+    public  MergeSortImplementation(int[] intArr){
         this.intArr = intArr;
+        this.arr = new int[intArr.length];
     }
 
     public int[] sort(int l, int r) {
@@ -18,7 +20,6 @@ public class MergeSortImplementation {
     }
 
     private void merge(int l, int q, int r) {
-        int[] arr = new int[intArr.length];
         int i, j;
         for (i = l; i <= q; i++) {
             arr[i] = intArr[i];

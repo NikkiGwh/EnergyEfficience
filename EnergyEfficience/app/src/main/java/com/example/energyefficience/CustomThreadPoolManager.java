@@ -28,6 +28,14 @@ interface MergeSortCallback{
 public class CustomThreadPoolManager {
 
     private static CustomThreadPoolManager singleInstance = null;
+
+    public static void setNumberOfCores(int numberOfCores) {
+        if(!(numberOfCores > Runtime.getRuntime().availableProcessors() || numberOfCores <= 0)){
+            NUMBER_OF_CORES = numberOfCores;
+            singleInstance = new CustomThreadPoolManager();
+        }
+    }
+
     private  static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
     private static final int KEEP_ALIVE_TIME = 1;
     private  static final TimeUnit KEEP_ALIVE_TIME_UNIT;
@@ -43,6 +51,7 @@ public class CustomThreadPoolManager {
     public Handler getMainThreadHandler(){
         return this.mainThreadHandler;
     }
+
 
     static{
         KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;

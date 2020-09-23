@@ -8,31 +8,31 @@ public class ParallelMergeSort extends RecursiveAction {
     private  final int low;
     private final int high;
     private final int MAX = 8192;
-    public ParallelMergeSort(final int[] array, final int low, final int high){
+    public ParallelMergeSort(final int[] array, final int[] helper, final int low, final int high){
         this.array = array;
         this.low = low;
         this.high = high;
-        this.helper = new int[array.length];
+        this.helper = helper;
 
     }
     @Override
     protected void compute() {
         if (low < high) {
             if (high - low <= MAX) { // Sequential implementation
-                new MergeSortImplementation(array).sort(low, high);
+                 sort(low, high);
             } else { // Parallel implementation
                 final int middle = (low + high) / 2;
                 final ParallelMergeSort left =
-                        new ParallelMergeSort(array, low, middle);
+                        new ParallelMergeSort(array,helper, low, middle);
                 final ParallelMergeSort right =
-                        new ParallelMergeSort(array, middle + 1, high);
+                        new ParallelMergeSort(array,helper,middle + 1, high);
                 invokeAll(left, right);
-                merge(array, helper, low, middle, high);
+                merge(low, middle, high);
             }
         }
     }
 
-    private void merge(int[] array, int[] helper, int low, int middle, int high){
+    private void merge(int low, int middle, int high){
         int i, j;
         for (i = low; i <= middle; i++) {
             helper[i] = array[i];
@@ -50,6 +50,15 @@ public class ParallelMergeSort extends RecursiveAction {
                 array[k] = helper[j];
                 j--;
             }
+        }
+    }
+    private void sort(int l, int r) {
+        if (l < r) {
+            int q = (l + r) / 2;
+
+            sort(l, q);
+            sort(q + 1, r);
+            merge(l, q, r);
         }
     }
 }

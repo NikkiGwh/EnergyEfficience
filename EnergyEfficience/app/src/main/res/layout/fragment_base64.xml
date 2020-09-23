@@ -38,7 +38,7 @@
             android:layout_marginTop="32dp"
             android:ems="10"
             android:hint="String size in KB"
-            android:inputType="textPersonName"
+            android:inputType="numberDecimal"
             app:layout_constraintStart_toStartOf="@+id/EncodeShowcaseBtn"
             app:layout_constraintTop_toBottomOf="@+id/EncodeShowcaseBtn" />
 
@@ -90,6 +90,27 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/encodebtn" />
+
+        <EditText
+            android:id="@+id/editTextTextNumOfCores"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:hint="set number of Threads"
+            android:inputType="numberDecimal"
+            app:layout_constraintBottom_toBottomOf="@+id/editTextStringSize"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/editTextStringSize" />
+
+        <Button
+            android:id="@+id/clearListBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_delete"
+            app:layout_constraintBottom_toBottomOf="@+id/buttonhope"
+            app:layout_constraintEnd_toEndOf="@+id/recyclerview" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

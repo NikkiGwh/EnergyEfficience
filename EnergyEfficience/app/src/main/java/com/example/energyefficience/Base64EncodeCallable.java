@@ -1,5 +1,6 @@
 package com.example.energyefficience;
 
+import java.util.Base64;
 import java.util.concurrent.Callable;
 import android.os.Handler;
 import android.util.Log;
@@ -17,9 +18,9 @@ public class Base64EncodeCallable implements Callable {
 
     @Override
     public Object call() throws Exception {
-        String plainText = Base64Implementation.createBigString(msgSize);
-        String encodedText = Base64Implementation.encodeSynchronously(plainText);
-        notifyResult(encodedText, callback, resultHandler);
+        String plainText = this.createBigString(msgSize);
+        byte[] buffer = plainText.getBytes();
+        notifyResult(Base64.getEncoder().encodeToString(buffer), callback, resultHandler);
         return null;
     }
     private void notifyResult(final String result, final Base64Callback callback, final Handler resultHandler){
@@ -30,5 +31,15 @@ public class Base64EncodeCallable implements Callable {
                 callback.onComplete(result);
             }
         });
+    }
+    public String createBigString(int msgSize){
+        //java chars are 2 bytes --> /2 = anzahl der chars * 1024 = Anzahl der Zahl für n KB
+        msgSize = msgSize / 2;
+        msgSize = msgSize* 1024;
+        StringBuilder sb = new StringBuilder(msgSize);
+        for(int i = 0; i< msgSize; i++){
+            sb.append('a');
+        }
+        return sb.toString();
     }
 }

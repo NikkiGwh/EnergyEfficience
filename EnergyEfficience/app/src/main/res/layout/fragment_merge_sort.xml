@@ -85,6 +85,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="parallel java library Sort" />
+            <RadioButton
+                android:id="@+id/radio_iterative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="iterative merge" />
         </RadioGroup>
 
         <TextView
