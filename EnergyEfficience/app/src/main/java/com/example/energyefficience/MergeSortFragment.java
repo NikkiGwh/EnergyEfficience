@@ -1,6 +1,8 @@
 package com.example.energyefficience;
 
+import android.app.Application;
 import android.content.ClipData;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -103,6 +105,7 @@ public class MergeSortFragment extends Fragment implements  MergeSortCallback{
     TextView computationTime;
     CustomThreadPoolManager mCutomThreadPoolManager;
     ForkJoinPool forkJoinPool;
+    Button GottoActivity;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -124,6 +127,14 @@ public class MergeSortFragment extends Fragment implements  MergeSortCallback{
         rb_iterative = rootView.findViewById(R.id.radio_iterative);
         rb_iterative.setOnClickListener(radioButtonOnClickListener);
         mCutomThreadPoolManager.setNumberOfCores(1);
+        GottoActivity = rootView.findViewById(R.id.GotToActivitBtn);
+        GottoActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent in = new Intent(getContext(), MergeSortActivity.class);
+                startActivity(in);
+            }
+        });
         forkJoinPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1);
         mCutomThreadPoolManager = CustomThreadPoolManager.getInstance();
         GenerateNumbersBtn = rootView.findViewById(R.id.generateNumbersBtn);
@@ -163,13 +174,11 @@ public class MergeSortFragment extends Fragment implements  MergeSortCallback{
     long result2 = 0;
     private void callMergeSort()
     {
-
-
         Items.clear();
          startTime = System.nanoTime();
         switch (choiceOfMerge){
             case 0:
-                mCutomThreadPoolManager.addCallable(new MergeSortCallable(mCutomThreadPoolManager.getMainThreadHandler(), ItemArray, this, 1));
+                mCutomThreadPoolManager.addCallable(new MergeSortCallable(mCutomThreadPoolManager.getMainThreadHandler(), ItemArray, this, 1, 1));
                 return;
             case 1:
                 int[] helper = new int[ItemArray.length];
@@ -180,7 +189,7 @@ public class MergeSortFragment extends Fragment implements  MergeSortCallback{
                 Arrays.parallelSort(ItemArray);
                 break;
             case 3:
-                mCutomThreadPoolManager.addCallable(new MergeSortCallable(mCutomThreadPoolManager.getMainThreadHandler(), ItemArray, this, 2));
+                mCutomThreadPoolManager.addCallable(new MergeSortCallable(mCutomThreadPoolManager.getMainThreadHandler(), ItemArray, this, 2, 1));
                 return;
             default:
                 break;
@@ -196,7 +205,7 @@ public class MergeSortFragment extends Fragment implements  MergeSortCallback{
     }
 
     @Override
-    public void onComplete(int[] restul) {
+    public void onComplete(int number) {
         stopTime2 = System.nanoTime();
         result2 = (stopTime2 - startTime)/1000000;
         computationTime.setText(String.valueOf(result2) + " ms");

@@ -18,13 +18,11 @@ public class Base64EncodeCallable implements Callable {
 
     @Override
     public Object call() throws Exception {
-        String plainText = this.createBigString(msgSize);
-        byte[] buffer = plainText.getBytes();
+        byte[] buffer = createBigString(msgSize).getBytes();
         notifyResult(Base64.getEncoder().encodeToString(buffer), callback, resultHandler);
         return null;
     }
     private void notifyResult(final String result, final Base64Callback callback, final Handler resultHandler){
-       // Log.i("aktueller Thread fertig: ", Thread.currentThread().getName());
         resultHandler.post(new Runnable() {
             @Override
             public void run() {

@@ -14,15 +14,6 @@
 
 
         <Button
-            android:id="@+id/buttonhope"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Encode Synch"
-            app:layout_constraintStart_toEndOf="@+id/encodebtn"
-            app:layout_constraintTop_toTopOf="@+id/encodebtn" />
-
-        <Button
             android:id="@+id/encodebtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -109,8 +100,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:drawable/ic_delete"
-            app:layout_constraintBottom_toBottomOf="@+id/buttonhope"
+            app:layout_constraintBottom_toBottomOf="@+id/encodebtn"
             app:layout_constraintEnd_toEndOf="@+id/recyclerview" />
+
+        <TextView
+            android:id="@+id/ProgressingTextViewBase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#F44336"
+            android:text="in progress"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/encodebtn"
+            app:layout_constraintEnd_toStartOf="@+id/clearListBtn"
+            app:layout_constraintStart_toEndOf="@+id/encodebtn"
+            app:layout_constraintTop_toTopOf="@+id/encodebtn" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

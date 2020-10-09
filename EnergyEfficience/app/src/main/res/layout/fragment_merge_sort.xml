@@ -101,6 +101,16 @@
             app:layout_constraintBottom_toTopOf="@+id/generateNumbersBtn"
             app:layout_constraintStart_toStartOf="@+id/generateNumbersBtn" />
 
+        <Button
+            android:id="@+id/GotToActivitBtn"
+            style="@style/Widget.AppCompat.Button"
+            android:layout_width="33dp"
+            android:layout_height="22dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/ic_action_football"
+            app:layout_constraintBottom_toTopOf="@+id/textViewComputationTime"
+            app:layout_constraintEnd_toEndOf="@+id/textViewComputationTime" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

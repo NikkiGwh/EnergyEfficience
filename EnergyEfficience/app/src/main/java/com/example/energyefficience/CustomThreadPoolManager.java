@@ -23,14 +23,14 @@ interface Base64Callback{
     void onComplete(String result);
 }
 interface MergeSortCallback{
-    void onComplete(int[] restul);
+    void onComplete(int number);
 }
 public class CustomThreadPoolManager {
 
     private static CustomThreadPoolManager singleInstance = null;
 
     public static void setNumberOfCores(int numberOfCores) {
-        if(!(numberOfCores > Runtime.getRuntime().availableProcessors() || numberOfCores <= 0)){
+        if(numberOfCores > 0){
             NUMBER_OF_CORES = numberOfCores;
             singleInstance = new CustomThreadPoolManager();
         }

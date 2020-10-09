@@ -1,11 +1,13 @@
 package com.example.energyefficience;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +18,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.Context.POWER_SERVICE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,17 +59,18 @@ public class Base64Fragment extends Fragment implements Base64Callback {
         fragment.setArguments(args);
         return fragment;
     }
+
     private Base64ViewModel base64ViewModel;
     Base64RecyclerViewAdapter adapter;
     List<String> statsItems = new ArrayList<String>();
     Button decode_btn;
-    Button decode_hope_btn;
     Button decodeShowcase_btn;
     Button clearList_btn;
-    TextView showCaseResultTextView;
+    TextView showCaseResultTextView, ProgressingTextView;
     EditText plainTextShowcaseEditText;
     EditText stringSizeEditText;
     EditText numOfThreadsEditText;
+
     //List<Base64BlindTextEntity> li;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,7 +81,8 @@ public class Base64Fragment extends Fragment implements Base64Callback {
         }
 
     }
-
+    PowerManager powerManager;
+    PowerManager.WakeLock wakeLock;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -98,11 +104,14 @@ public class Base64Fragment extends Fragment implements Base64Callback {
             }
         });
         */
+        powerManager = (PowerManager) getActivity().getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp::MyWakeLockTag");
         decode_btn = (Button) rootView.findViewById(R.id.encodebtn);
         decodeShowcase_btn = (Button) rootView.findViewById(R.id.EncodeShowcaseBtn);
         clearList_btn = rootView.findViewById(R.id.clearListBtn);
         plainTextShowcaseEditText = (EditText) rootView.findViewById(R.id.editTextPlainTextExample);
         numOfThreadsEditText = rootView.findViewById(R.id.editTextTextNumOfCores);
+        ProgressingTextView = rootView.findViewById(R.id.ProgressingTextViewBase);
         showCaseResultTextView = (TextView) rootView.findViewById(R.id.textViewShowcase);
         decodeShowcase_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,12 +137,12 @@ public class Base64Fragment extends Fragment implements Base64Callback {
                decode_btn.setBackgroundColor(getResources().getColor(R.color.colorAccent));
             }
         });*/
-       decode_btn.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
-               doEncodingAsynch();
-           }
-       });
+        decode_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                doEncodingAsynch();
+            }
+        });
         clearList_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -142,18 +151,12 @@ public class Base64Fragment extends Fragment implements Base64Callback {
             }
         });
         stringSizeEditText = rootView.findViewById(R.id.editTextStringSize);
-        decode_hope_btn = rootView.findViewById(R.id.buttonhope);
-        decode_hope_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                doEncodeSynch();
-            }
-        });
         return rootView;
 
     }
+
     private int currentSize = 0;
-    private int chunkPerThreadSize =0;
+    private int chunkPerThreadSize = 0;
     private CustomThreadPoolManager mCustomThreadPoolManager;
 
     @Override
@@ -164,58 +167,49 @@ public class Base64Fragment extends Fragment implements Base64Callback {
 
     @Override
     public void onComplete(String result) {
-        synchronized (this){
+        synchronized (this) {
             currentSize += chunkPerThreadSize;
             String encoded = result;
-            if(currentSize >= totaldataInKB){
+            if (currentSize >= totaldataInKB) {
                 currentSize = 0;
                 endTime = System.nanoTime();
-                long duration =  (endTime-startTime) / 1000000 ;
+                long duration = (endTime - startTime) / 1000000;
                 Log.d("BASE64:", "runtime Asynch: " + String.valueOf(duration) + " ms");
-                statsItems.add("asynchronous Base64 decoding on " + mCustomThreadPoolManager.getNumberOfCores() + " Threads:: " + totaldataInKB + " KB" + " in " + String.valueOf(duration) +" ms");
+                statsItems.add("asynchronous Base64 decoding on " + mCustomThreadPoolManager.getNumberOfCores() + " Threads:: " + totaldataInKB + " KB" + " in " + String.valueOf(duration) + " ms");
                 adapter.setElementsList(statsItems);
+                ProgressingTextView.setVisibility(View.INVISIBLE);
+                wakeLock.release();
             }
         }
     }
+
     long startTime = 0;
     long endTime = 0;
     int totaldataInKB = 0;
     int chunksizeInKB = 10000;
     int threadNumber = 0;
-    public void doEncodingAsynch(){
-        try{
-             threadNumber = Integer.parseInt(numOfThreadsEditText.getText().toString());
-        }catch (Exception ex){
+
+
+    public void doEncodingAsynch() {
+        wakeLock.acquire();
+        try {
+            threadNumber = Integer.parseInt(numOfThreadsEditText.getText().toString());
+            totaldataInKB = Integer.parseInt(stringSizeEditText.getText().toString());
+        } catch (Exception ex) {
             Log.e("ERRor", "getInteger parse error");
         }
+        if (totaldataInKB < chunksizeInKB)
+            totaldataInKB = 10000;
         mCustomThreadPoolManager.setNumberOfCores(threadNumber);
         mCustomThreadPoolManager = CustomThreadPoolManager.getInstance();
-
+        ProgressingTextView.setVisibility(View.VISIBLE);
         startTime = System.nanoTime();
-        totaldataInKB = Integer.parseInt(stringSizeEditText.getText().toString());
+
         chunkPerThreadSize = chunksizeInKB / mCustomThreadPoolManager.getNumberOfCores();
-        for( int i = 0; i < totaldataInKB; i = i +chunksizeInKB){
-            for(int j = 0; j < chunksizeInKB; j = j + chunkPerThreadSize){
-                Base64EncodeCallable callable = new Base64EncodeCallable(chunkPerThreadSize,this, mCustomThreadPoolManager.getMainThreadHandler());
-                mCustomThreadPoolManager.addCallable(callable);
-            }
+        for (int i = 0; i < totaldataInKB; i = i + chunkPerThreadSize) {
+            Base64EncodeCallable callable = new Base64EncodeCallable(chunkPerThreadSize, this, mCustomThreadPoolManager.getMainThreadHandler());
+            mCustomThreadPoolManager.addCallable(callable);
         }
 
-    }
-    public void doEncodeSynch(){
-        startTime = System.nanoTime();
-        totaldataInKB = Integer.parseInt(stringSizeEditText.getText().toString());
-        String hopefully;
-        int i = 0;
-        for( i = 0; i < totaldataInKB; i = i +chunksizeInKB){
-            hopefully = Base64Implementation.createBigString(chunksizeInKB);
-            String resultencoded = Base64Implementation.encodeSynchronously(hopefully);
-        }
-        endTime = System.nanoTime();
-        long duration =  (endTime-startTime) / 1000000;
-        Log.d("BASE64:", "runtime snych: " + String.valueOf(duration) + " ms");
-        statsItems.add("synchronouse Base64 decoding on UI-Thread of " + totaldataInKB + " KB" + " in " + String.valueOf(duration) +" ms");
-        //todo undo comment if nothing is updated on the screen .. otherwise delte following line
-        adapter.setElementsList(statsItems);
     }
 }

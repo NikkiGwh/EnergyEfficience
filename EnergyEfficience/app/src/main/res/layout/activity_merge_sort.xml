@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MergeSortActivity">
+
+
+    <RadioGroup
+        android:id="@+id/radioGroup2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <RadioButton
+            android:id="@+id/radio_parallel_library2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="parallel java library Sort" />
+
+        <RadioButton
+            android:id="@+id/radio_parallel2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="parallel merge Sort" />
+
+        <RadioButton
+            android:id="@+id/radio_iterative2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="iterative merge" />
+
+        <RadioButton
+            android:id="@+id/radio_classic2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="classic recursive" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/MergeSortBtn2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Merge sort"
+        app:layout_constraintBottom_toTopOf="@+id/generateNumbersBtn2"
+        app:layout_constraintEnd_toEndOf="@+id/generateNumbersBtn2" />
+
+    <Button
+        android:id="@+id/generateNumbersBtn2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="generate new numbers"
+        app:layout_constraintBottom_toBottomOf="@+id/radioGroup2"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <EditText
+        android:id="@+id/editTextNumOfIterations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:ems="10"
+        android:hint="number of Iterations"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/radioGroup2"
+        app:layout_constraintStart_toStartOf="@+id/radioGroup2" />
+
+    <TextView
+        android:id="@+id/textViewComputationTime2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="computation Time"
+        app:layout_constraintBottom_toTopOf="@+id/editTextNumOfIterations"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/inProgressTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#F44336"
+        android:text="in Progress"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/textViewComputationTime2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
