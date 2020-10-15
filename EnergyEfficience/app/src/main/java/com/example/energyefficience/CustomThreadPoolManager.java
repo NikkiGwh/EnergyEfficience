@@ -27,15 +27,6 @@ interface MergeSortCallback{
 }
 public class CustomThreadPoolManager {
 
-    private static CustomThreadPoolManager singleInstance = null;
-
-    public static void setNumberOfCores(int numberOfCores) {
-        if(numberOfCores > 0){
-            NUMBER_OF_CORES = numberOfCores;
-            singleInstance = new CustomThreadPoolManager();
-        }
-    }
-
     private  static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
     private static final int KEEP_ALIVE_TIME = 1;
     private  static final TimeUnit KEEP_ALIVE_TIME_UNIT;
@@ -43,15 +34,7 @@ public class CustomThreadPoolManager {
     private final ExecutorService mExecuterService;
     private final BlockingQueue<Runnable> mTaskQueue;
     private List<Future> mRunningTaskList;
-
-    public void addCallable(Callable callable){
-        Future future = mExecuterService.submit(callable);
-        mRunningTaskList.add(future);
-    }
-    public Handler getMainThreadHandler(){
-        return this.mainThreadHandler;
-    }
-
+    private static CustomThreadPoolManager singleInstance = null;
 
     static{
         KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
@@ -68,8 +51,19 @@ public class CustomThreadPoolManager {
                 mTaskQueue,
                 new BackgroundThreadFactory());
     }
-
-
+    public static void setNumberOfCores(int numberOfCores) {
+        if(numberOfCores > 0){
+            NUMBER_OF_CORES = numberOfCores;
+            singleInstance = new CustomThreadPoolManager();
+        }
+    }
+    public void addCallable(Callable callable){
+        Future future = mExecuterService.submit(callable);
+        mRunningTaskList.add(future);
+    }
+    public Handler getMainThreadHandler(){
+        return this.mainThreadHandler;
+    }
     public static CustomThreadPoolManager getInstance(){
         return singleInstance;
     }
@@ -89,21 +83,18 @@ public class CustomThreadPoolManager {
     }
     private static class BackgroundThreadFactory implements ThreadFactory {
         private static int sTag = 1;
-
         @Override
         public Thread newThread(Runnable runnable) {
             Thread thread = new Thread(runnable);
             thread.setName("CustomThread" + sTag);
             sTag++;
             thread.setPriority(THREAD_PRIORITY_BACKGROUND);
-            // A exception handler is created to log the exception from threads
             thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
                 @Override
                 public void uncaughtException(Thread thread, Throwable ex) {
                     Log.e("ThreadFactory", thread.getName() + " encountered an error: " + ex.getMessage());
                 }
             });
-
             return thread;
         }
     }
