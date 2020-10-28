@@ -98,7 +98,6 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
         MergeSortNumberEntity[] arr = new MergeSortNumberEntity[0];
         try {
             arr = fu.get();
-            Log.i("niklas", String.valueOf(arr.length));
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -223,7 +222,8 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
         wakeLock.release();
     }
 
-    private synchronized void resetArray(int[] arr) {
+    private void resetArray(int[] arr) {
+        arr = new int[DefaultArray.length];
         for (int i = 0; i < DefaultArray.length; i++) {
             arr[i] = DefaultArray[i];
         }
