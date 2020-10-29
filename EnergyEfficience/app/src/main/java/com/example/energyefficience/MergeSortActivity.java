@@ -30,7 +30,6 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
     MergeSortNumberDao mergeSortNumberDao;
 
     CustomThreadPoolManager mCustomThreadPoolManager;
-    ForkJoinPool forkJoinPool;
 
     Button MergeSort, GenerateNewNumbers;
     EditText NumOfIterationsEditText;
@@ -41,6 +40,7 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
     int choiceOfMerge = 0;
     int[] DefaultArray;
     int[] arr;
+    Future<MergeSortNumberEntity[]> future;
     long startTime = 0;
     long stopTime = 0;
     long stopTime2 = 0;
@@ -48,7 +48,6 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
     long result2 = 0;
     int currentIteration = 0;
     int totalIterations = 1;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,30 +84,14 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
         rb_parallel_library.setOnClickListener(radioButtonOnClickListener);
         mCustomThreadPoolManager.setNumberOfCores(1);
         mCustomThreadPoolManager = CustomThreadPoolManager.getInstance();
-        DefaultArray = getNumbersFromDB();
-        arr = new int[DefaultArray.length];
-        resetArray(arr);
-        forkJoinPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1);
+        future = executor.submit(new MergeSortDBCallable(0, mergeSortNumberDao));
+        DefaultArray = null;
+        arr = null;
+        new CustomDialog(2).show(getSupportFragmentManager(), "dialog");
     }
 
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private int[] getNumbersFromDB() {
-        Future<MergeSortNumberEntity[]> fu = executor.submit(new MergeSortDBCallable(0, mergeSortNumberDao));
-        MergeSortNumberEntity[] arr = new MergeSortNumberEntity[0];
-        try {
-            arr = fu.get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        int[] arr2 = new int[arr.length];
-        for (int i = 0; i < arr2.length; i++) {
-            arr2[i] = arr[i].value;
-        }
-        return arr2;
-    }
 
     @Override
     public void onComplete(int number) {
@@ -117,6 +100,8 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
         ComputationTimeTextView.setText(String.valueOf(result2) + " ms");
         InProgressTextView.setVisibility(View.INVISIBLE);
         wakeLock.release();
+        MergeSort.setEnabled(true);
+        GenerateNewNumbers.setEnabled(true);
     }
 
     View.OnClickListener radioButtonOnClickListener = new View.OnClickListener() {
@@ -154,6 +139,7 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
             li2.add(new MergeSortNumberEntity(i, DefaultArray[i]));
         }
         insertAll(li2);
+        resetArray();
     }
 
     private int getRandomNumber(int min, int max) {
@@ -164,6 +150,7 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
     private void insertAll(List<MergeSortNumberEntity> ob) {
         new MergeSortActivity.insertAsyncTask(mergeSortNumberDao).execute(ob);
     }
+
 
     private static class insertAsyncTask extends AsyncTask<List<MergeSortNumberEntity>, Void, Void> {
         private MergeSortNumberDao mAsyncTaskDao;
@@ -178,13 +165,39 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
             return null;
         }
     }
-
+    private void initializeArrays()
+    {
+        if(DefaultArray == null){
+            MergeSortNumberEntity[] help = new MergeSortNumberEntity[0];
+            try {
+                help = future.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if(help != null){
+                DefaultArray = new int[help.length];
+                for(int i = 0; i < help.length; i++){
+                    DefaultArray[i] = help[i].value;
+                }
+            }else{
+                DefaultArray = null;
+            }
+        }
+        resetArray();
+    }
 
     private void callMergeSort() {
+        InProgressTextView.setVisibility(View.VISIBLE);
+        MergeSort.setEnabled(false);
+        GenerateNewNumbers.setEnabled(false);
+        initializeArrays();
+        if(DefaultArray == null||arr==null){
+            new CustomDialog(1).show(getSupportFragmentManager(), "dialog");
+            return;
+        }
 
         wakeLock.acquire();
-        InProgressTextView.setVisibility(View.VISIBLE);
-        resetArray(arr);
+
         totalIterations = 1;
         try {
             totalIterations = Integer.parseInt(NumOfIterationsEditText.getText().toString());
@@ -197,35 +210,29 @@ public class MergeSortActivity extends AppCompatActivity implements MergeSortCal
                 mCustomThreadPoolManager.addCallable(new MergeSortCallable(mCustomThreadPoolManager.getMainThreadHandler(), arr, this, 1, totalIterations));
                 return;
             case 1:
-                int[] helper = new int[DefaultArray.length];
-                for (currentIteration = 0; currentIteration < totalIterations; currentIteration++) {
-                    resetArray(arr);
-                    forkJoinPool.invoke(new ParallelMergeSort(arr, helper, 0, arr.length - 1));
-                }
-                break;
+                mCustomThreadPoolManager.addCallable(new MergeSortCallable(mCustomThreadPoolManager.getMainThreadHandler(), arr, this, 3, totalIterations));
+                return;
             case 2:
-                for (currentIteration = 0; currentIteration < totalIterations; currentIteration++) {
-                    resetArray(arr);
-                    Arrays.parallelSort(arr);
-                }
-                break;
+                mCustomThreadPoolManager.addCallable(new MergeSortCallable(mCustomThreadPoolManager.getMainThreadHandler(), arr, this, 4, totalIterations));
+                return;
             case 3:
                 mCustomThreadPoolManager.addCallable(new MergeSortCallable(mCustomThreadPoolManager.getMainThreadHandler(), arr, this, 2, totalIterations));
                 return;
             default:
+                wakeLock.release();
                 return;
         }
-        stopTime = System.nanoTime();
-        result = (stopTime - startTime) / 1000000;
-        ComputationTimeTextView.setText(String.valueOf(result) + " ms");
-        InProgressTextView.setVisibility(View.INVISIBLE);
-        wakeLock.release();
     }
 
-    private void resetArray(int[] arr) {
-        arr = new int[DefaultArray.length];
-        for (int i = 0; i < DefaultArray.length; i++) {
-            arr[i] = DefaultArray[i];
+
+    private void resetArray() {
+        if(DefaultArray != null){
+            arr = new int[DefaultArray.length];
+            for (int i = 0; i < DefaultArray.length; i++) {
+                arr[i] = DefaultArray[i];
+            }
+        }else{
+            arr = null;
         }
     }
 

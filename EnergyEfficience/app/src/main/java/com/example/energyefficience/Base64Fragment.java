@@ -151,6 +151,7 @@ public class Base64Fragment extends Fragment implements Base64Callback {
             }
         });
         stringSizeEditText = rootView.findViewById(R.id.editTextStringSize);
+        new CustomDialog(5).show(getActivity().getSupportFragmentManager(), "dialog");
         return rootView;
 
     }
@@ -196,7 +197,8 @@ public class Base64Fragment extends Fragment implements Base64Callback {
             threadNumber = Integer.parseInt(numOfThreadsEditText.getText().toString());
             totaldataInKB = Integer.parseInt(stringSizeEditText.getText().toString());
         } catch (Exception ex) {
-            Log.e("ERRor", "getInteger parse error");
+            new CustomDialog(3).show(getActivity().getSupportFragmentManager(), "dialog");
+            return;
         }
         if (totaldataInKB < chunksizeInKB)
             totaldataInKB = 10000;

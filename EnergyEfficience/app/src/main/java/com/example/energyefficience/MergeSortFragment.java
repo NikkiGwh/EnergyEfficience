@@ -98,7 +98,7 @@ public class MergeSortFragment extends Fragment implements  MergeSortCallback{
     int choiceOfMerge = 0;
     MergeSortRecyclerViewAdapter adapter;
     List<String> Items = new ArrayList<String>();
-    int[] ItemArray;
+    int[] ItemArray = null;
     Button MergeSortBtn, GenerateNumbersBtn;
     EditText CountOfFigures;
     RadioButton rb_classic, rb_parallel, rb_parallel_library, rb_iterative;
@@ -142,12 +142,23 @@ public class MergeSortFragment extends Fragment implements  MergeSortCallback{
         GenerateNumbersBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-              ItemArray = generateRandomIntArray(Integer.parseInt(CountOfFigures.getText().toString()));
+                int num = 0;
+                try{
+                    num = Integer.parseInt(CountOfFigures.getText().toString());
+                }catch (NumberFormatException ex){
+                    new CustomDialog(3).show(getActivity().getSupportFragmentManager(), "dialog");
+                    return;
+                }
+              ItemArray = generateRandomIntArray(num);
             }
         });
         MergeSortBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(ItemArray == null){
+                    new CustomDialog(4).show(getActivity().getSupportFragmentManager(), "dialog");
+                    return;
+                }
                 callMergeSort();
             }
         });
