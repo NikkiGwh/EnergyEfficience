@@ -180,6 +180,7 @@ public class Base64Fragment extends Fragment implements Base64Callback {
                 adapter.setElementsList(statsItems);
                 ProgressingTextView.setVisibility(View.INVISIBLE);
                 wakeLock.release();
+                decode_btn.setEnabled(true);
             }
         }
     }
@@ -192,7 +193,8 @@ public class Base64Fragment extends Fragment implements Base64Callback {
 
 
     public void doEncodingAsynch() {
-        wakeLock.acquire();
+
+
         try {
             threadNumber = Integer.parseInt(numOfThreadsEditText.getText().toString());
             totaldataInKB = Integer.parseInt(stringSizeEditText.getText().toString());
@@ -200,6 +202,8 @@ public class Base64Fragment extends Fragment implements Base64Callback {
             new CustomDialog(3).show(getActivity().getSupportFragmentManager(), "dialog");
             return;
         }
+        decode_btn.setEnabled(false);
+        wakeLock.acquire();
         if (totaldataInKB < chunksizeInKB)
             totaldataInKB = 10000;
         mCustomThreadPoolManager.setNumberOfCores(threadNumber);
